@@ -1,0 +1,37 @@
+```{r}
+Customer_Behavior_Data_to_Improve_Customer_Retention_csv <- read_excel("Downloads/Customer_Behavior_Data_to_Improve_Customer_Retention.csv.xlsx")
+df_lo <- Customer_Behavior_Data_to_Improve_Customer_Retention_csv
+df_lo <- df_lo[,c(2:21)]
+```
+check for nan values
+```{r}
+sum(is.na(df_lo))
+```
+where is the nan value
+```{r}
+which(is.na(df_lo), arr.ind=TRUE)
+```
+
+```{r}
+sd(df_lo$TotalCharges, na.rm=TRUE)
+```
+the standard deviation is high, so choose median instead of mean
+```{r}
+df_lo$TotalCharges[is.na(df_lo$TotalCharges)] <- median(df_lo$TotalCharges, na.rm=TRUE)
+```
+check for nan
+```{r}
+sum(is.na(df_lo))
+```
+```{r}
+library(fastDummies)
+library(dplyr)
+df_dum <- dummy_cols(df_lo)
+df_new <- df_dum[,c(2,5,18,19,21:61,63)]
+df_scal <- df_new %>% mutate_each_(funs(scale(.) %>% as.vector), vars=c(1:45))
+log1 <- glm(Churn_Yes ~ ., data = df_scal, family = "binomial")
+rank_par <- as.data.frame(log1$coefficients)
+rank_par <- as.data.frame(na.omit(rank_par))
+rank_par
+```
+
